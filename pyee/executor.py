@@ -59,20 +59,11 @@ class ExecutorEventEmitter(EventEmitter):
         args: Tuple[Any, ...],
         kwargs: Dict[str, Any],
     ) -> None:
-        future: Future = self._executor.submit(f, *args, **kwargs)
-
-        @future.add_done_callback
-        def _callback(f: Future) -> None:
-            exc: Optional[BaseException] = f.exception()
-            if isinstance(exc, Exception):
-                self.emit("error", exc)
-            elif exc is not None:
-                raise exc
+        pass
 
     def shutdown(self: Self, wait: bool = True) -> None:
         """Call `shutdown` on the internal executor."""
-
-        self._executor.shutdown(wait=wait)
+        pass
 
     def __enter__(self: Self) -> "ExecutorEventEmitter":
         return self

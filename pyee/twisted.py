@@ -59,37 +59,7 @@ class TwistedEventEmitter(EventEmitter):
         args: Tuple[Any, ...],
         kwargs: Dict[str, Any],
     ) -> None:
-        d: Optional[Deferred[Any]] = None
-        try:
-            result = f(*args, **kwargs)
-        except Exception:
-            self.emit("failure", Failure())
-        else:
-            if iscoroutine(result):
-                d = ensureDeferred(result)
-            elif isinstance(result, Deferred):
-                d = result
-            elif not d:
-                return
-
-            def errback(failure: Failure) -> None:
-                if failure:
-                    self.emit("failure", failure)
-
-            d.addErrback(errback)
+        pass
 
     def _emit_handle_potential_error(self: Self, event: str, error: Any) -> None:
-        if event == "failure":
-            if isinstance(error, Failure):
-                try:
-                    error.raiseException()
-                except Exception as exc:
-                    self.emit("error", exc)
-            elif isinstance(error, Exception):
-                self.emit("error", error)
-            else:
-                self.emit("error", PyeeError(f"Unexpected failure object: {error}"))
-        else:
-            cast(Any, super(TwistedEventEmitter, self))._emit_handle_potential_error(
-                event, error
-            )
+        pass

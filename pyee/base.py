@@ -109,10 +109,7 @@ class EventEmitter:
         mypy or pyright, you will probably want to use either
         `EventEmitter#listens_to` or `EventEmitter#add_listener`.
         """
-        if f is None:
-            return self.listens_to(event)
-        else:
-            return self.add_listener(event, f)
+        pass
 
     def listens_to(self: Self, event: str) -> Callable[[Handler], Handler]:
         """Returns a decorator which will register the decorated function to
@@ -127,12 +124,7 @@ class EventEmitter:
         By only supporting the decorator use case, this method has improved
         type safety over `EventEmitter#on`.
         """
-
-        def on(f: Handler) -> Handler:
-            self._add_event_handler(event, f, f)
-            return f
-
-        return on
+        pass
 
     def add_listener(self: Self, event: str, f: Handler) -> Handler:
         """Register the function `f` to the event name `event`:
@@ -147,21 +139,11 @@ class EventEmitter:
         By not supporting the decorator use case, this method has improved
         type safety over `EventEmitter#on`.
         """
-        self._add_event_handler(event, f, f)
-        return f
+        pass
 
     def _add_event_handler(self: Self, event: str, k: Callable, v: Callable):
         # Fire 'new_listener' *before* adding the new listener!
-        self.emit("new_listener", event, k)
-
-        # Add the necessary function
-        # Note that k and v are the same for `on` handlers, but
-        # different for `once` handlers, where v is a wrapped version
-        # of k which removes itself before calling k
-        with self._lock:
-            if event not in self._events:
-                self._events[event] = OrderedDict()
-            self._events[event][k] = v
+        pass
 
     def _emit_run(
         self: Self,
@@ -169,18 +151,14 @@ class EventEmitter:
         args: Tuple[Any, ...],
         kwargs: Dict[str, Any],
     ) -> None:
-        f(*args, **kwargs)
+        pass
 
     def event_names(self: Self) -> Set[str]:
         """Get a set of events that this emitter is listening to."""
-        return set(self._events.keys())
+        pass
 
     def _emit_handle_potential_error(self: Self, event: str, error: Any) -> None:
-        if event == "error":
-            if isinstance(error, Exception):
-                raise error
-            else:
-                raise PyeeError(f"Uncaught, unspecified 'error' event: {error}")
+        pass
 
     def _call_handlers(
         self: Self,
@@ -188,15 +166,7 @@ class EventEmitter:
         args: Tuple[Any, ...],
         kwargs: Dict[str, Any],
     ) -> bool:
-        handled = False
-
-        with self._lock:
-            funcs = list(self._events.get(event, OrderedDict()).values())
-        for f in funcs:
-            self._emit_run(f, args, kwargs)
-            handled = True
-
-        return handled
+        pass
 
     def emit(
         self: Self,
@@ -217,12 +187,7 @@ class EventEmitter:
         Assuming `data` is an attached function, this will call
         `data('00101001')'`.
         """
-        handled = self._call_handlers(event, args, kwargs)
-
-        if not handled:
-            self._emit_handle_potential_error(event, args[0] if args else None)
-
-        return handled
+        pass
 
     def once(
         self: Self,
@@ -232,53 +197,22 @@ class EventEmitter:
         """The same as `ee.on`, except that the listener is automatically
         removed after being called.
         """
-
-        def _wrapper(f: Callable) -> Callable:
-            def g(
-                *args: Any,
-                **kwargs: Any,
-            ) -> Any:
-                with self._lock:
-                    # Check that the event wasn't removed already right
-                    # before the lock
-                    if event in self._events and f in self._events[event]:
-                        self._remove_listener(event, f)
-                    else:
-                        return None
-                # f may return a coroutine, so we need to return that
-                # result here so that emit can schedule it
-                return f(*args, **kwargs)
-
-            self._add_event_handler(event, f, g)
-            return f
-
-        if f is None:
-            return _wrapper
-        else:
-            return _wrapper(f)
+        pass
 
     def _remove_listener(self: Self, event: str, f: Callable) -> None:
         """Naked unprotected removal."""
-        if event in self._events:
-            self._events[event].pop(f)
-            if not self._events[event]:
-                del self._events[event]
+        pass
 
     def remove_listener(self: Self, event: str, f: Callable) -> None:
         """Removes the function `f` from `event`."""
-        with self._lock:
-            self._remove_listener(event, f)
+        pass
 
     def remove_all_listeners(self: Self, event: Optional[str] = None) -> None:
         """Remove all listeners attached to `event`.
         If `event` is `None`, remove all listeners on all events.
         """
-        with self._lock:
-            if event is not None:
-                self._events[event] = OrderedDict()
-            else:
-                self._events = dict()
+        pass
 
     def listeners(self: Self, event: str) -> List[Callable]:
         """Returns a list of all listeners registered to the `event`."""
-        return list(self._events.get(event, OrderedDict()).keys())
+        pass

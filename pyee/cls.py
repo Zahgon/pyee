@@ -16,13 +16,13 @@ class Handlers:
         self._handlers: List[Handler] = []
 
     def append(self, handler) -> None:
-        self._handlers.append(handler)
+        pass
 
     def __iter__(self) -> Iterator[Handler]:
         return iter(self._handlers)
 
     def reset(self):
-        self._handlers = []
+        pass
 
 
 _handlers = Handlers()
@@ -33,20 +33,11 @@ def on(event: str) -> Callable[[Callable], Callable]:
     Register an event handler on an evented class. See the `evented` class
     decorator for a full example.
     """
-
-    def decorator(method: Callable) -> Callable:
-        _handlers.append(Handler(event=event, method=method))
-        return method
-
-    return decorator
+    pass
 
 
 def _bind(self: Any, method: Any) -> Any:
-    @wraps(method)
-    def bound(*args, **kwargs) -> Any:
-        return method(self, *args, **kwargs)
-
-    return bound
+    pass
 
 
 Cls = TypeVar("Cls", bound=Type)
@@ -97,20 +88,4 @@ def evented(cls: Cls) -> Cls:
             await self.some_async_action(*args, **kwargs)
     ```
     """
-    handlers: List[Handler] = list(_handlers)
-    _handlers.reset()
-
-    og_init: Callable = cls.__init__
-
-    @wraps(cls.__init__)
-    def init(self: Any, *args: Any, **kwargs: Any) -> None:
-        og_init(self, *args, **kwargs)
-        if not hasattr(self, "event_emitter"):
-            self.event_emitter = EventEmitter()
-
-        for h in handlers:
-            self.event_emitter.on(h.event, _bind(self, h.method))
-
-    cls.__init__ = init
-
-    return cls
+    pass

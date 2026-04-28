@@ -67,7 +67,7 @@ class AsyncIOEventEmitter(EventEmitter):
         canceled with `wait_for_complete` and `cancel`, respectively; and
         their status may be checked via the `complete` property.
         """
-        return super().emit(event, *args, **kwargs)
+        pass
 
     def _emit_run(
         self: Self,
@@ -75,37 +75,7 @@ class AsyncIOEventEmitter(EventEmitter):
         args: Tuple[Any, ...],
         kwargs: Dict[str, Any],
     ) -> None:
-        try:
-            coro: Any = f(*args, **kwargs)
-        except Exception as exc:
-            self.emit("error", exc)
-        else:
-            if iscoroutine(coro):
-                if self._loop:
-                    # ensure_future is *extremely* cranky about the types here,
-                    # but this is relatively well-tested and I think the types
-                    # are more strict than they should be
-                    fut: Any = ensure_future(cast(Any, coro), loop=self._loop)
-                else:
-                    fut = ensure_future(cast(Any, coro))
-
-            elif isinstance(coro, Future):
-                fut = cast(Any, coro)
-            else:
-                return
-
-            def callback(f: Future) -> None:
-                self._waiting.discard(f)
-
-                if f.cancelled():
-                    return
-
-                exc: Optional[BaseException] = f.exception()
-                if exc:
-                    self.emit("error", exc)
-
-            fut.add_done_callback(callback)
-            self._waiting.add(fut)
+        pass
 
     async def wait_for_complete(self: Self) -> None:
         """Waits for all pending tasks to complete. For example:
@@ -127,8 +97,7 @@ class AsyncIOEventEmitter(EventEmitter):
         application and want to ensure all coroutines have completed execution
         beforehand.
         """
-        if self._waiting:
-            await wait(self._waiting)
+        pass
 
     def cancel(self: Self) -> None:
         """Cancel all pending tasks. For example:
@@ -149,10 +118,7 @@ class AsyncIOEventEmitter(EventEmitter):
         This is useful if you're attempting to shut down your application and
         attempts at a graceful shutdown via `wait_for_complete` have failed.
         """
-        for fut in self._waiting:
-            if not fut.done() and not fut.cancelled():
-                fut.cancel()
-        self._waiting.clear()
+        pass
 
     @property
     def complete(self: Self) -> bool:
@@ -176,4 +142,4 @@ class AsyncIOEventEmitter(EventEmitter):
         print(ee.complete)
         ```
         """
-        return not self._waiting
+        pass

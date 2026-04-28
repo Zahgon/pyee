@@ -16,8 +16,7 @@ EMIT_WRAPPERS: Dict[EventEmitter, Callable[[], None]] = dict()
 
 def unwrap(event_emitter: EventEmitter) -> None:
     """Unwrap an uplifted EventEmitter, returning it to its prior state."""
-    if event_emitter in EMIT_WRAPPERS:
-        EMIT_WRAPPERS[event_emitter]()
+    pass
 
 
 def _wrap(
@@ -26,52 +25,7 @@ def _wrap(
     error_handler: Any,
     proxy_new_listener: bool,
 ) -> None:
-    left_emit = left.emit
-    left_unwrap: Optional[Callable[[], None]] = EMIT_WRAPPERS.get(left)
-
-    @wraps(left_emit)
-    def wrapped_emit(event: str, *args: Any, **kwargs: Any) -> bool:
-        left_handled: bool = left._call_handlers(event, args, kwargs)
-
-        # Do it for the right side
-        if proxy_new_listener or event != "new_listener":
-            right_handled = right._call_handlers(event, args, kwargs)
-        else:
-            right_handled = False
-
-        handled = left_handled or right_handled
-
-        # Use the error handling on `error_handler` (should either be
-        # `left` or `right`)
-        if not handled:
-            error_handler._emit_handle_potential_error(event, args[0] if args else None)
-
-        return handled
-
-    def _unwrap() -> None:
-        warnings.warn(
-            DeprecationWarning(
-                "Patched ee.unwrap() is deprecated and will be removed in a "
-                "future release. Use pyee.uplift.unwrap instead."
-            )
-        )
-        unwrap(left)
-
-    def unwrap_hook() -> None:
-        cast(Any, left).emit = left_emit
-        if left_unwrap:
-            EMIT_WRAPPERS[left] = left_unwrap
-        else:
-            del EMIT_WRAPPERS[left]
-            del left.unwrap  # type: ignore
-        cast(Any, left).emit = left_emit
-
-        unwrap(right)
-
-    cast(Any, left).emit = wrapped_emit
-
-    EMIT_WRAPPERS[left] = unwrap_hook
-    left.unwrap = _unwrap  # type: ignore
+    pass
 
 
 _PROXY_NEW_LISTENER_SETTINGS: Dict[str, Tuple[bool, bool]] = dict(
@@ -158,21 +112,4 @@ def uplift(
     least implement the interface for the undocumented `_call_handlers` and
     `_emit_handle_potential_error` methods.
     """
-
-    (
-        new_proxy_new_listener,
-        underlying_proxy_new_listener,
-    ) = _PROXY_NEW_LISTENER_SETTINGS[proxy_new_listener]
-
-    new: UpliftingEventEmitter = cls(*args, **kwargs)
-
-    uplift_error_handlers: Dict[str, Tuple[EventEmitter, EventEmitter]] = dict(
-        new=(new, new), underlying=(underlying, underlying), neither=(new, underlying)
-    )
-
-    new_error_handler, underlying_error_handler = uplift_error_handlers[error_handling]
-
-    _wrap(new, underlying, new_error_handler, new_proxy_new_listener)
-    _wrap(underlying, new, underlying_error_handler, underlying_proxy_new_listener)
-
-    return new
+    pass

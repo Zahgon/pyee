@@ -86,13 +86,7 @@ class TrioEventEmitter(EventEmitter):
         args: Tuple[Any, ...],
         kwargs: Dict[str, Any],
     ) -> Callable[[], Awaitable[None]]:
-        async def runner() -> None:
-            try:
-                await f(*args, **kwargs)
-            except Exception as exc:
-                self.emit("error", exc)
-
-        return runner
+        pass
 
     def _emit_run(
         self: Self,
@@ -100,9 +94,7 @@ class TrioEventEmitter(EventEmitter):
         args: Tuple[Any, ...],
         kwargs: Dict[str, Any],
     ) -> None:
-        if not self._nursery:
-            raise PyeeError("Uninitialized trio nursery")
-        self._nursery.start_soon(self._async_runner(f, args, kwargs))
+        pass
 
     @asynccontextmanager
     async def context(
@@ -113,14 +105,7 @@ class TrioEventEmitter(EventEmitter):
         async context management methods are implemented using this
         function, but it may also be used directly for clarity.
         """
-        if self._nursery is not None:
-            yield self
-        elif self._manager is not None:
-            async with self._manager as nursery:
-                self._nursery = nursery
-                yield self
-        else:
-            raise PyeeError("Uninitialized nursery or nursery manager")
+        pass
 
     async def __aenter__(self: Self) -> "TrioEventEmitter":
         self._context: Optional[AbstractAsyncContextManager["TrioEventEmitter"]] = (
